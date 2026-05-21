@@ -2,6 +2,7 @@
 
 const STORAGE_KEY = "wheel-game-state";
 
+
 const defaultTeams = [
   { name: "Team 1", total: 0, round: 0 },
   { name: "Team 2", total: 0, round: 0 },
@@ -27,6 +28,7 @@ export const getState = () => {
 export const saveState = (state) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 };
+
 
 // On new puzzle: fold each team's round score into total, reset round
 export const setPuzzle = (puzzle) => {
@@ -90,8 +92,10 @@ export const resetGame = () => {
 };
 
 // Auto reveal: shuffles every individual non-space tile index and reveals
-// them one at a time at intervals that shrink by 1.5x (speeds up).
-// Starting interval: 3000ms. Pattern: 3s, 2s, 1.33s, 0.89s ...
+// them one at a time at intervals that shrink by 1.1 and add stopping function 
+
+export const autoRevealTimeouts = [];
+
 export const startAutoReveal = () => {
   const state = getState();
   const phrase = state.puzzle?.phrase || "";
@@ -108,9 +112,13 @@ export const startAutoReveal = () => {
 
   indices.forEach((tileIndex) => {
     delay += interval;
-    interval /= 1.2;
-    setTimeout(() => {
-      revealIndex(tileIndex);
-    }, delay);
+    interval /= 1.15;
+    const id = setTimeout(() => revealIndex(tileIndex), delay);
+    autoRevealTimeouts.push(id);
   });
+};
+
+export const stopAutoReveal = () => {
+  autoRevealTimeouts.forEach(id => clearTimeout(id));
+  autoRevealTimeouts.length = 0;
 };

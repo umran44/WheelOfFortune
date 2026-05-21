@@ -1,6 +1,6 @@
 // src/pages/Host.jsx
 import { useState } from "react";
-import { getState, setPuzzle, revealLetter, revealAll, startAutoReveal, addPoints, bankruptTeam, resetGame } from "../game/gameState";
+import { getState, setPuzzle, revealLetter, revealAll, startAutoReveal, stopAutoReveal, addPoints, bankruptTeam, resetGame } from "../game/gameState";
 
 const puzzles = [
   { category: "Movie", phrase: "THE DARK KNIGHT" },
@@ -57,11 +57,20 @@ export default function Host() {
   const [pendingPuzzle, setPendingPuzzle] = useState(null);
   // One manual-points input value per team
   const [pointInputs, setPointInputs] = useState(["", "", ""]);
+  const [autoPaused, setAutoPaused] = useState(false);
+  const [usedPuzzles, setUsedPuzzles] = useState([]);
+
 
   const refresh = () => setState(getState());
 
   const handleNewPuzzle = () => {
-    const p = puzzles[Math.floor(Math.random() * puzzles.length)];
+    const remaining = puzzles.filter(p => !usedPuzzles.includes(p.phrase));
+    if (remaining.length === 0) {
+      alert("All puzzles have been used!");
+      return;
+    }
+    const p = remaining[Math.floor(Math.random() * remaining.length)];
+    setUsedPuzzles(prev => [...prev, p.phrase]);
     setPendingPuzzle(p);
     setMode("picking");
   };
@@ -113,6 +122,7 @@ export default function Host() {
   setPendingPuzzle(null);
   setPointInputs(["", "", ""]);
   refresh();
+  setUsedPuzzles([]);
 };
 
 
@@ -158,16 +168,30 @@ export default function Host() {
         </>
       )}
 
-      {mode === "auto" && (
-        <>
+    {mode === "auto" && (
+      <>
         <div style={{ marginTop: 16, padding: 14, background: "#1f2937", borderRadius: 10, color: "#a78bfa", fontWeight: "bold" }}>
-          ⚡ Auto reveal running…
+          {autoPaused ? "⏸ Auto reveal paused" : "⚡ Auto reveal running…"}
         </div>
+        <button
+          onClick={() => {
+            if (autoPaused) {
+              startAutoReveal();
+              setAutoPaused(false);
+            } else {
+              stopAutoReveal();
+              setAutoPaused(true);
+            }
+          }}
+          style={btn({ marginTop: 10, background: autoPaused ? "#22c55e" : "#f59e0b", color: "white", fontSize: 15 })}
+        >
+          {autoPaused ? "▶ Resume" : "⏸ Pause"}
+        </button>
         <button onClick={handleRevealAll} style={btn({ marginTop: 14, background: "red", color: "white", fontSize: 15 })}>
-            Reveal Full Phrase
-          </button>
-          </>
-      )}
+          Reveal Full Phrase
+        </button>
+      </>
+    )}
 
       {/* ── Team Controls ── */}
       <h2 style={{ marginTop: 32, marginBottom: 12 }}>Teams</h2>
