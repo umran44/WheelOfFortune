@@ -46,9 +46,9 @@ const btn = (extra = {}) => ({
   ...extra,
 });
 
-function playBuzzer() {
-  const audio = new Audio("/buzzer.mp3");
-  audio.play();
+
+function revealPhrase(){
+  const audio = new Audio("/reveal.mp3");
 }
 
 export default function Host() {
@@ -80,7 +80,7 @@ export default function Host() {
   };
 
   const reveal = (l) => { revealLetter(l); refresh(); };
-  const handleRevealAll = () => { revealAll(); refresh(); };
+  const handleRevealAll = () => { revealPhrase(); revealAll(); refresh(); };
 
   const handleAddPoints = (i, amount) => {
     addPoints(i, amount);
@@ -123,11 +123,6 @@ export default function Host() {
   ↺ Reset Game
     </button>
 
-      {/* ── Buzzer ── */}
-      <button onClick={playBuzzer} style={btn({ background: "#111", color: "#ef4444", fontSize: 22, padding: "12px 28px", border: "2px solid #ef4444", marginBottom: 20, letterSpacing: 2 })}>
-        🔴 WRONG
-      </button>
-
       {/* ── New Puzzle ── */}
       <button onClick={handleNewPuzzle} style={btn({ background: "#3b82f6", color: "white", fontSize: 16, padding: "10px 22px" })}>
         New Puzzle
@@ -164,9 +159,14 @@ export default function Host() {
       )}
 
       {mode === "auto" && (
+        <>
         <div style={{ marginTop: 16, padding: 14, background: "#1f2937", borderRadius: 10, color: "#a78bfa", fontWeight: "bold" }}>
           ⚡ Auto reveal running…
         </div>
+        <button onClick={handleRevealAll} style={btn({ marginTop: 14, background: "red", color: "white", fontSize: 15 })}>
+            Reveal Full Phrase
+          </button>
+          </>
       )}
 
       {/* ── Team Controls ── */}

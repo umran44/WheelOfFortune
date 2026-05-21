@@ -41,6 +41,10 @@ function playShimmer() {
     osc.stop(end);
   });
 }
+function playBuzzer() {
+  const audio = new Audio("/fahhh.mp3");
+  audio.play();
+}
 
 function padRow(full, target = 14) {
   const missing = target - full.length;
@@ -94,6 +98,13 @@ export default function Display() {
         });
       }
     });
+
+  //wrong sound effect 
+  const phraseLetters = new Set(phrase.split("").filter(c => c !== " "));
+  const newlyRevealed = state.revealed.filter(l => !prevRevealedLetters.current.has(l));
+  const hasNewWrongGuess = newlyRevealed.some(l => !phraseLetters.has(l));
+  if (hasNewWrongGuess) playBuzzer();
+
     // Auto mode (revealedIndices) intentionally excluded — no flash
 
     if (newlyFlashing.size > 0) {
@@ -245,7 +256,6 @@ export default function Display() {
         const wrongGuesses = state.revealed.filter(l => !phraseLetters.has(l)).sort();
 
         if (wrongGuesses.length === 0) return null;
-
         return (
           <div style={{ marginTop: 40, textAlign: "center" }}>
             <div style={{ color: "#6b7280", fontSize: 13, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
