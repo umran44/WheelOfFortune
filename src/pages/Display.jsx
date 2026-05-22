@@ -42,7 +42,7 @@ function playShimmer() {
   });
 }
 function playBuzzer() {
-  const audio = new Audio("/fahhh.mp3");
+  const audio = new Audio("/WheelOfFortune/fahhh.mp3");
   audio.play();
 }
 
