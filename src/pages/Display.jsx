@@ -21,10 +21,9 @@ const STYLES = `
   }
 `;
 
-// Shimmer sound: rapid ascending arpeggio of sine tones
 function playShimmer() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const notes = [523, 659, 784, 1047, 1319, 1568, 2093]; // C5 up two octaves
+  const notes = [523, 659, 784, 1047, 1319, 1568, 2093];
   notes.forEach((freq, i) => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -40,10 +39,6 @@ function playShimmer() {
     osc.start(start);
     osc.stop(end);
   });
-}
-function playBuzzer() {
-  const audio = new Audio("/WheelOfFortune/fahhh.mp3");
-  audio.play();
 }
 
 function padRow(full, target = 14) {
@@ -61,13 +56,20 @@ function padRow(full, target = 14) {
 
 export default function Display() {
   const [state, setState] = useState(getState());
-  // Only manual mode (letter-based reveals) triggers flash
   const [flashingIndices, setFlashingIndices] = useState(new Set());
   const [isSolved, setIsSolved] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
 
   const prevRevealedLetters = useRef(new Set());
   const prevRevealedIndices = useRef(new Set());
   const solvedSoundPlayed = useRef(false);
+
+  // moved inside component so it can access soundEnabled
+  const playBuzzer = () => {
+    if (!soundEnabled) return;
+    const audio = new Audio("/WheelOfFortune/fahhh.mp3");
+    audio.play();
+  };
 
   useEffect(() => {
     const update = () => setState(getState());
@@ -89,7 +91,6 @@ export default function Display() {
       .filter(({ c }) => c !== " ")
       .map(({ i }) => i);
 
-    // Flash only for newly revealed letters (manual mode)
     const newlyFlashing = new Set();
     state.revealed.forEach(letter => {
       if (!prevRevealedLetters.current.has(letter)) {
@@ -99,20 +100,16 @@ export default function Display() {
       }
     });
 
-  //wrong sound effect 
-  const phraseLetters = new Set(phrase.split("").filter(c => c !== " "));
-  const newlyRevealed = state.revealed.filter(l => !prevRevealedLetters.current.has(l));
-  const hasNewWrongGuess = newlyRevealed.some(l => !phraseLetters.has(l));
-  if (hasNewWrongGuess) playBuzzer();
-
-    // Auto mode (revealedIndices) intentionally excluded — no flash
+    const phraseLetters = new Set(phrase.split("").filter(c => c !== " "));
+    const newlyRevealed = state.revealed.filter(l => !prevRevealedLetters.current.has(l));
+    const hasNewWrongGuess = newlyRevealed.some(l => !phraseLetters.has(l));
+    if (hasNewWrongGuess) playBuzzer();
 
     if (newlyFlashing.size > 0) {
       setFlashingIndices(newlyFlashing);
       setTimeout(() => setFlashingIndices(new Set()), 750);
     }
 
-    // Check solved
     const totalRevealed = new Set([
       ...state.revealedIndices,
       ...phrase.split("").flatMap((c, i) =>
@@ -132,7 +129,7 @@ export default function Display() {
 
     prevRevealedLetters.current = new Set(state.revealed);
     prevRevealedIndices.current = new Set(state.revealedIndices);
-  }, [state]);
+  }, [state, soundEnabled]);
 
   if (!state.puzzle || !state.puzzle.phrase) {
     return <h1>Waiting for game...</h1>;
@@ -203,6 +200,16 @@ export default function Display() {
   return (
     <div style={{ minHeight: "100vh", background: "#111827", color: "white", display: "flex", flexDirection: "column", alignItems: "center", padding: 40 }}>
       <style>{STYLES}</style>
+
+      {!soundEnabled && (
+        <button
+          onClick={() => setSoundEnabled(true)}
+          style={{ position: "fixed", top: 20, right: 20, padding: "10px 16px", background: "#22c55e", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: "bold", fontSize: 14 }}
+        >
+          🔊 Enable Sound
+        </button>
+      )}
+
       <h1>{state.puzzle.category}</h1>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20, alignItems: "center" }}>
@@ -249,7 +256,6 @@ export default function Display() {
         ))}
       </div>
 
-      {/* Wrong guesses (manual mode only) — letters guessed that aren't in the phrase */}
       {(() => {
         const phrase = state.puzzle.phrase;
         const phraseLetters = new Set(phrase.split("").filter(c => c !== " "));
@@ -286,7 +292,6 @@ export default function Display() {
         );
       })()}
 
-      {/* Team Scores */}
       {state.teams && state.teams.length > 0 && (
         <div style={{ marginTop: 48, width: "100%", maxWidth: 800 }}>
           <div style={{ color: "#6b7280", fontSize: 13, letterSpacing: 2, marginBottom: 14, textAlign: "center", textTransform: "uppercase" }}>
