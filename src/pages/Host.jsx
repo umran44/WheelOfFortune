@@ -34,6 +34,10 @@ const puzzles = [
   { category: "Location", phrase: "FREDDYS PIZZERIA"},
   { category: "Location", phrase: "THE SEA OF MONSTERS"},
   { category: "Location", phrase: "SURFER BOY PIZZA SHOP"},
+  {category: "Location", phrase: "COMPUTER LAB"},
+  {category: "TV Show", phrase: "GOSSIP GIRL"},
+  {category: "Food", phrase: "CHICKEN ALFREDO"},
+  {category: "TV Show", phrase: "KEEPING UP WITH THE KARDASHIANS"},
 ];
 
 const btn = (extra = {}) => ({

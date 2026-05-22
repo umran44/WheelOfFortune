@@ -158,7 +158,7 @@ export default function Display() {
 
   const rows = [];
   const pushindex = [];
-  const less14 = spaceIndices.filter(i => i < 14);
+  const less14 = spaceIndices.filter(i => i <= 14);
   let firstpush = 0;
   if (less14.length === 0) {
     rows.push(tiles.slice(0, tiles.length));
@@ -166,11 +166,11 @@ export default function Display() {
     firstpush = Math.max(...less14);
     pushindex.push({ type: "integer", value: firstpush });
 
-    const less28 = spaceIndices.filter(i => i > firstpush && i < firstpush + 14);
+    const less28 = spaceIndices.filter(i => i > firstpush && i <= firstpush + 14);
     if (less28.length > 0) {
       const secondpush = Math.max(...less28);
       pushindex.push({ type: "integer", value: secondpush });
-      const less42 = spaceIndices.filter(i => i > secondpush && i < secondpush + 14);
+      const less42 = spaceIndices.filter(i => i > secondpush && i <= secondpush + 14);
       if (less42.length > 0) {
         const thirdpush = Math.max(...less42);
         pushindex.push({ type: "integer", value: thirdpush });
